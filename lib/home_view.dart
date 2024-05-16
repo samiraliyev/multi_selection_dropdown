@@ -14,6 +14,7 @@ class HomeView extends StatefulWidget {
 class _HomeViewState extends State<HomeView> {
   RxList<DropdownItem> selectedOptionList = RxList<DropdownItem>([]);
   List<DropdownItem> options = [];
+  bool isLoading = false;
 
   @override
   void initState() {
@@ -22,13 +23,20 @@ class _HomeViewState extends State<HomeView> {
   }
 
   Future<void> fetchDropdownItems() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
       final apiService = ApiService();
       final List<DropdownItem> items = await apiService.fetchDropdownItems();
       setState(() {
         options = items;
+        isLoading = false;
       });
     } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
       throw Exception();
     }
   }
@@ -46,22 +54,25 @@ class _HomeViewState extends State<HomeView> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              DropDownMultiSelect<DropdownItem>(
-                options: options,
-                whenEmpty: "Select options",
-                onChanged: (selectedValues) {
-                  setState(() {
-                    selectedOptionList.value = selectedValues;
-                  });
-                },
-                selectedValues: selectedOptionList.toList(),
-              ),
+              isLoading
+                  ? const CircularProgressIndicator() // Show loading indicator
+                  : DropDownMultiSelect<DropdownItem>(
+                      options: options,
+                      whenEmpty: "Select options",
+                      onChanged: (selectedValues) {
+                        setState(() {
+                          selectedOptionList.clear();
+                          selectedOptionList.addAll(selectedValues);
+                        });
+                      },
+                      selectedValues: selectedOptionList.toList(),
+                    ),
               const SizedBox(
                 height: 50.0,
               ),
               Obx(
                 () => Text(
-                  selectedOptionList.map((item) => item.title).join(", \n"),
+                  selectedOptionList.map((item) => item.name).join(",\n"),
                 ),
               ),
             ],

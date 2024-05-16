@@ -5,7 +5,7 @@ import 'package:multi_select_dropdown/model.dart';
 class ApiService {
   Future<List<DropdownItem>> fetchDropdownItems() async {
     final response =
-        await http.get(Uri.parse('https://jsonplaceholder.typicode.com/posts'));
+        await http.get(Uri.parse('https://jsonplaceholder.typicode.com/users'));
 
     if (response.statusCode == 200) {
       final List<dynamic> data = jsonDecode(response.body);
